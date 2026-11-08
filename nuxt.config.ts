@@ -12,5 +12,9 @@ export default defineNuxtConfig({
 
   hub: {
     db: 'sqlite',
+  },
+
+  nitro: {
+    preset: 'cloudflare_module'
   }
 })
