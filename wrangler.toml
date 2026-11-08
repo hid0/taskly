@@ -1,0 +1,7 @@
+compatibility_date = "2025-01-01"
+name = "taskly"
+
+[[d1_databases]]
+binding = "DB"
+database_id = "fec437d8-62e0-4e3f-a00f-402a75a0695b"
+database_name = "taskly"
