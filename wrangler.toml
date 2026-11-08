@@ -3,7 +3,6 @@ main = "./.output/server/index.mjs"
 name = "taskly"
 
 [assets]
-binding = "ASSETS"
 directory = "./.output/public"
 
 [[d1_databases]]
