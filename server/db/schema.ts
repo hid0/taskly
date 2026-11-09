@@ -1,6 +1,21 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
 
+export const users = sqliteTable('users', {
+  id: text('id').primaryKey(),
+  username: text('username').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  name: text('name').notNull().default('User'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`)
+})
+
+export const sessions = sqliteTable('sessions', {
+  token: text('token').primaryKey(),
+  userId: text('user_id').notNull(),
+  expiresAt: integer('expires_at').notNull(),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`)
+})
+
 export const categories = sqliteTable('categories', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
