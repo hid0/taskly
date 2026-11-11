@@ -104,6 +104,8 @@ export const useTasklyStore = defineStore('taskly', () => {
   const isBreakRunning = ref(false)
 
   let timerStartedAt: number | null = null
+  // Track last update timestamp for shared timer state to avoid stale overwrites
+  let lastSharedTimerUpdatedAt = 0
   let timerBaseLoggedSeconds = 0
   let breakStartedAt: number | null = null
   let tickerInterval: ReturnType<typeof setInterval> | null = null
