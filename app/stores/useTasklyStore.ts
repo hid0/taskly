@@ -188,9 +188,7 @@ export const useTasklyStore = defineStore('taskly', () => {
   }
 
   function applySharedTimerState(state: SharedTimerState) {
-    if (state.date && state.date !== selectedDate.value) {
-      selectedDate.value = state.date
-    }
+    // Jangan pernah menimpa selectedDate.value dengan state.date agar tanggal yang sedang dilihat tidak terbajak
     timerMode.value = state.timerMode || 'work'
     lastCompletedTaskId.value = state.lastCompletedTaskId || null
     breakDurationSeconds.value = state.breakDurationSeconds || 300
@@ -220,9 +218,15 @@ export const useTasklyStore = defineStore('taskly', () => {
     if (!raw) return
     try {
       const parsed = JSON.parse(raw) as SharedTimerState
+      const today = getLocalTodayString()
+      // Jika data timer di storage berasal dari tanggal sebelumnya, otomatis reset timer agar tidak stale
+      if (parsed.date && parsed.date !== today) {
+        resetTimer()
+        return
+      }
       applySharedTimerState(parsed)
     } catch {
-      // Ignore invalid json
+      resetTimer()
     }
   }
 
@@ -470,7 +474,7 @@ export const useTasklyStore = defineStore('taskly', () => {
   }
 
   watch(selectedDate, (newDate) => {
-    fetchDayData(newDate, true)
+    fetchDayData(newDate, false)
   })
 
   // --- 2. POMODORO & BREAK TICKER ENGINE (SHARED ACROSS ALL TABS) ---
@@ -646,6 +650,34 @@ export const useTasklyStore = defineStore('taskly', () => {
     }
   }
 
+  function resetTimer() {
+    stopTickerInterval()
+    if (activeTaskId.value) {
+      const task = items.value.find(i => i.id === activeTaskId.value)
+      if (task) {
+        lastFocusFinishedAt.value = Date.now()
+        syncTaskToDb(
+          task.id,
+          {
+            loggedSeconds: task.loggedSeconds,
+            completedSessions: task.completedSessions
+          },
+          true
+        )
+      }
+    }
+    activeTaskId.value = null
+    timerStartedAt = null
+    timerBaseLoggedSeconds = 0
+    timerMode.value = 'work'
+    breakStartedAt = null
+    breakRemainingSeconds.value = 0
+    isBreakRunning.value = false
+    lastCompletedTaskId.value = null
+    lastDbSyncSecond = -1
+    saveSharedTimerState()
+  }
+
   // --- 3. CRUD ACTIONS ---
   async function syncTaskToDb(
     id: string,
@@ -794,6 +826,11 @@ export const useTasklyStore = defineStore('taskly', () => {
   }
 
   function changeDate(offsetDays: number) {
+    if (activeTaskId.value) {
+      stopTimer()
+    } else if (timerMode.value === 'break') {
+      stopBreak()
+    }
     const [year, month, day] = selectedDate.value.split('-').map(Number)
     const d = new Date(year!, month! - 1, day!)
     d.setDate(d.getDate() + offsetDays)
@@ -801,6 +838,11 @@ export const useTasklyStore = defineStore('taskly', () => {
   }
 
   function goToToday() {
+    if (activeTaskId.value) {
+      stopTimer()
+    } else if (timerMode.value === 'break') {
+      stopBreak()
+    }
     selectedDate.value = getLocalTodayString()
   }
 
@@ -849,6 +891,7 @@ export const useTasklyStore = defineStore('taskly', () => {
     dismissYesterdayReminder,
     toggleTimer,
     stopTimer,
+    resetTimer,
     startBreak,
     stopBreak,
     resumeLastTask,

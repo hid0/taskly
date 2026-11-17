@@ -502,6 +502,20 @@ const sessionProgressPercentage = computed(() => {
                 </span>
               </div>
             </button>
+
+            <!-- Tombol Reset Cepat di Bawah Lingkaran Timer jika timer/break aktif -->
+            <button
+              v-if="store.activeTaskId || store.timerMode !== 'work'"
+              @click.stop="store.resetTimer()"
+              class="absolute -bottom-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border transition-all shadow-xs flex items-center gap-1 z-20"
+              :class="store.isDarkMode
+                ? 'bg-slate-900 border-slate-700 text-slate-300 hover:text-rose-400 hover:border-rose-500/50'
+                : 'bg-white border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-300'"
+              title="Reset timer ke 25:00"
+            >
+              <RotateCcw class="w-2.5 h-2.5" />
+              <span>Reset</span>
+            </button>
           </div>
 
           <!-- Right Column: Active Task / Break Prompt / Daily Progress -->
@@ -543,6 +557,12 @@ const sessionProgressPercentage = computed(() => {
                   <Play class="w-3.5 h-3.5" />
                   <span>Lanjut Fokus Tanpa Istirahat</span>
                 </button>
+                <button @click="store.resetTimer()"
+                  class="px-3 py-2 rounded-xl text-xs font-medium border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 transition flex items-center gap-1.5"
+                  title="Batalkan & Reset Timer">
+                  <RotateCcw class="w-3.5 h-3.5" />
+                  <span>Reset Timer</span>
+                </button>
               </div>
             </div>
 
@@ -579,6 +599,11 @@ const sessionProgressPercentage = computed(() => {
                     class="px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1">
                     <RotateCcw class="w-3 h-3" />
                     <span>Selesai & Lanjut Kerja</span>
+                  </button>
+                  <button @click="store.resetTimer()"
+                    class="px-2.5 py-1 rounded-lg text-xs font-semibold border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 transition flex items-center gap-1"
+                    title="Akhiri istirahat & reset timer">
+                    <span>Reset</span>
                   </button>
                 </div>
               </div>
@@ -617,6 +642,16 @@ const sessionProgressPercentage = computed(() => {
                       ">
                     <Sparkles class="w-3 h-3 text-emerald-400" />
                     <span>Peregangan 10m</span>
+                  </button>
+                  <button
+                    v-if="store.activeTaskId"
+                    type="button"
+                    @click="store.resetTimer()"
+                    class="px-2.5 py-1 rounded-lg text-[11px] font-medium border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 transition flex items-center gap-1"
+                    title="Reset & hentikan sesi timer"
+                  >
+                    <RotateCcw class="w-3 h-3 text-rose-400" />
+                    <span>Reset Timer</span>
                   </button>
                 </div>
               </div>
